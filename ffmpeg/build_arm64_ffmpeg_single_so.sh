@@ -15,7 +15,7 @@ TARGET=$PLATFORM-linux-android  #请查看目录下对应文件名，这里是64
 TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin # 这里找到对应得文件
 # SYSROOT=$NDK/platforms/android-21/arch-arm64
 SYSROOT=$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot
-PREFIX=`dirname $0`/android/$PLATFORM
+PREFIX=`dirname $0`/android/$PLATFORM-single
   
 CFLAG="-D__ANDROID_API__=$API -U_FILE_OFFSET_BITS -DBIONIC_IOCTL_NO_SIGNEDNESS_OVERLOAD -Os -fPIC -DANDROID -D__thumb__ -mthumb -Wfatal-errors -Wno-deprecated -mfloat-abi=softfp -marm"
   
@@ -34,8 +34,8 @@ mkdir -p $TMPDIR
 --strip=$TOOLCHAIN/$TARGET-strip \
 --target-os=android \
 --arch=$ARCH \
---enable-shared \
---disable-static \
+--disable-shared \
+--enable-static \
 --enable-runtime-cpudetect \
 --disable-doc \
 --disable-ffmpeg \
@@ -69,3 +69,21 @@ make clean
 make -j4
   
 make install
+
+$TOOLCHAIN/arm-linux-androideabi-ld \
+    -rpath-link=$SYSROOT/usr/lib/aarch64-linux-android \
+    -L$SYSROOT/usr/lib/aarch64-linux-android/$API \
+    -L$SYSROOT/usr/lib/aarch64-linux-android \
+    -L$PREFIX/lib \
+    -L$TOOLCHAIN/../lib/gcc/aarch64-linux-android/4.9.x \
+    -soname libffmpeg.so -shared -nostdlib -Bsymbolic --whole-archive --no-undefined -o \
+    $PREFIX/libffmpeg.so \
+        libavfilter/libavfilter.a \
+        libswresample/libswresample.a \
+        libavformat/libavformat.a \
+        libavutil/libavutil.a \
+        libswscale/libswscale.a \
+        libavcodec/libavcodec.a \
+        libavdevice/libavdevice.a \
+        -lc -lm -lz -ldl -llog --dynamic-linker=/system/bin/linker \
+        $TOOLCHAIN/../lib/gcc/$ARCH-linux-android/4.9.x/libgcc.a 
