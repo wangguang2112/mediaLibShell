@@ -38,7 +38,7 @@ mkdir -p $TMPDIR
 --enable-static \
 --enable-runtime-cpudetect \
 --disable-doc \
---disable-ffmpeg \
+--enable-ffmpeg \
 --disable-ffplay \
 --disable-ffprobe \
 --disable-doc \
@@ -77,7 +77,7 @@ $TOOLCHAIN/arm-linux-androideabi-ld \
     -L$PREFIX/lib \
     -L$TOOLCHAIN/../lib/gcc/aarch64-linux-android/4.9.x \
     -soname libffmpeg.so -shared -nostdlib -Bsymbolic --whole-archive --no-undefined -o \
-    $PREFIX/libffmpeg.so \
+    $PREFIX/lib/libffmpeg.so \
         libavfilter/libavfilter.a \
         libswresample/libswresample.a \
         libavformat/libavformat.a \
